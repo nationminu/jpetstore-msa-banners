@@ -1,0 +1,10 @@
+{
+    "banners":
+    [
+        {"favcategory":"FISH","bannername":"<image src=\"../images/banner_fish.gif\">","descn":"Saltwater, Freshwater","image":"<image src=\"../images/fish_icon.gif\">"},
+        {"favcategory":"CATS","bannername":"<image src=\"../images/banner_cats.gif\">","descn":"Various Breeds","image":"<image src=\"../images/dogs_icon.gif\">"},
+        {"favcategory":"DOGS","bannername":"<image src=\"../images/banner_dogs.gif\">","descn":"Various Breeds, Exotic Varieties","image":"<image src=\"../images/reptiles_icon.gif\">"},
+        {"favcategory":"REPTILES","bannername":"<image src=\"../images/banner_reptiles.gif\">","descn":"Lizards, Turtles, Snakes","image":"<image src=\"../images/cats_icon.gif\">"},
+        {"favcategory":"BIRDS","bannername":"<image src=\"../images/banner_birds.gif\">","descn":"Exotic Varieties","image":"<image src=\"../images/birds_icon.gif\">"}
+    ] 
+} 

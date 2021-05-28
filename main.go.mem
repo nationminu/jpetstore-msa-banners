@@ -1,0 +1,132 @@
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"fmt" 
+	"log"
+	"net/http"   
+	"strings" 
+)
+
+var (
+	host string
+	port string
+)
+
+func init() {
+	flag.StringVar(&host, "host", "localhost", "Host on which to run")
+	flag.StringVar(&port, "port", "8080", "Port on which to run")
+}
+ 
+type Banners struct {
+    Banners []Banner `json:"banners"`
+}
+
+type Banner struct {
+	Favcategory  string `json:"favcategory"`
+	Bannername    string  `json:"bannername"`
+	Descn    string  `json:"descn"`
+	Image    string  `json:"image"`
+}
+
+func doNothing(w http.ResponseWriter, r *http.Request) {}
+ 
+func forbidden(w http.ResponseWriter, r *http.Request) {
+	// see http://golang.org/pkg/net/http/#pkg-constants
+	w.WriteHeader(http.StatusForbidden)
+	w.Write([]byte("403 HTTP status code returned!"))
+}
+
+func jsonData() []byte {
+	json := []byte(`{"banners":[{"favcategory":"FISH","bannername":"<image src=\"..\/images\/banner_fish.gif\">","descn":"Saltwater, Freshwater","image":"<image src=\"..\/images\/fish_icon.gif\">"},{"favcategory":"CATS","bannername":"<image src=\"..\/images\/banner_cats.gif\">","descn":"Various Breeds","image":"<image src=\"..\/images\/dogs_icon.gif\">"},{"favcategory":"DOGS","bannername":"<image src=\"..\/images\/banner_dogs.gif\">","descn":"Various Breeds, Exotic Varieties","image":"<image src=\"..\/images\/reptiles_icon.gif\">"},{"favcategory":"REPTILES","bannername":"<image src=\"..\/images\/banner_reptiles.gif\">","descn":"Lizards, Turtles, Snakes","image":"<image src=\"..\/images\/cats_icon.gif\">"},{"favcategory":"BIRDS","bannername":"<image src=\"..\/images\/banner_birds.gif\">","descn":"Exotic Varieties","image":"<image src=\"..\/images\/birds_icon.gif\">"}]}`)
+	return json
+}
+
+func find() Banners {
+	
+	banners := Banners{} 
+
+	input := jsonData()
+	json.Unmarshal(input, &banners)  
+	
+	return banners
+}
+
+func one(id string) Banner {
+	
+	banners := Banners{}
+	banner := Banner{} 
+
+	input := jsonData()
+	json.Unmarshal(input, &banners)  
+
+	for i := range banners.Banners {  
+		//fmt.Println("|",banners.banners[i].Catid , "|==|" , id,"|")
+		if(string(banners.Banners[i].Favcategory) == id) {
+			//fmt.Println(banners.banners[i])
+			banner = banners.Banners[i] 
+		}
+    }
+
+	return banner
+}
+
+func findAll(w http.ResponseWriter, r *http.Request) {  
+	if r.Method == "POST" {		 
+
+	} else if r.Method == "GET" {
+		fmt.Println("Endpoint Hit: getBanners")
+
+		banners := find() 
+	
+		output, err := json.Marshal(banners.Banners)
+		//output, err := json.MarshalIndent(banners.Banners, "", "    ")
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		w.Header().Set("content-type", "application/json")
+		w.Write(output)
+		fmt.Println(string(output))
+
+		fmt.Println("Endpoint Hit: getBanners") 
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("403 HTTP status code returned!")) 
+	}
+}
+
+
+func findOne(w http.ResponseWriter, r *http.Request) {  
+	id := strings.TrimPrefix(r.URL.Path, "/banners/") 
+	banners := one(id)  
+	
+	output, err := json.Marshal(banners)
+	//output, err := json.MarshalIndent(categories.Categories, "", "    ")
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	w.Header().Set("content-type", "application/json")
+	w.Write(output)
+	fmt.Println(string(output)) 
+}
+
+func handleRequests() {
+	http.HandleFunc("/favicon.ico", doNothing) 
+	http.HandleFunc("/banners", findAll)
+	http.HandleFunc("/banners/", findOne)
+	address := ":" + port
+
+	log.Println("Starting server on address", address)
+	err := http.ListenAndServe(address, nil)
+	if err != nil {
+		panic(err)
+	}
+}
+ 
+func main() {
+	flag.Parse()
+	handleRequests()
+}
